@@ -11,51 +11,38 @@ app.use(express.json());
 
 const dbPath = path.join(__dirname, 'users.json');
 
-// Pastikan file users.json ada
+// Inisialisasi DB jika belum ada
 if (!fs.existsSync(dbPath)) {
   fs.writeFileSync(dbPath, JSON.stringify({ users: {} }, null, 2));
 }
 
-// ====== API: DAFTAR ======
+// API Daftar
 app.post('/api/daftar', (req, res) => {
   const { username, password, phone } = req.body;
-
   if (!username || !password || !phone) {
-    return res.json({ success: false, error: 'Data tidak lengkap' });
+    return res.status(400).json({ success: false, error: 'Data tidak lengkap' });
   }
 
   const db = JSON.parse(fs.readFileSync(dbPath));
-
   if (db.users[username]) {
-    return res.json({ success: false, error: 'Username sudah terdaftar' });
+    return res.status(400).json({ success: false, error: 'Username sudah terdaftar' });
   }
 
   db.users[username] = { password, phone };
   fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-
-  return res.json({ success: true });
+  res.json({ success: true });
 });
 
-// ====== API: LOGIN ======
+// API Login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   const db = JSON.parse(fs.readFileSync(dbPath));
-
-  if (!db.users[username]) {
-    return res.json({ success: false, error: 'User tidak ditemukan' });
+  if (!db.users[username] || db.users[username].password !== password) {
+    return res.status(401).json({ success: false, error: 'Login gagal' });
   }
 
-  if (db.users[username].password !== password) {
-    return res.json({ success: false, error: 'Password salah' });
-  }
-
-  return res.json({ success: true });
-});
-
-// ====== Default route ======
-app.get('/', (req, res) => {
-  res.send('Aiss Auth Backend aktif!');
+  res.json({ success: true });
 });
 
 app.listen(PORT, () => {
