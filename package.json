@@ -1,7 +1,6 @@
 {
-  "name": "aiss-auth-backend",
+  "name": "aiss-backend",
   "version": "1.0.0",
-  "description": "Backend otentikasi sederhana untuk Aiss Game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
